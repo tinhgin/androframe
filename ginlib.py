@@ -1,11 +1,12 @@
 import zipfile
 import os.path
-#import getpass
+import shutil
 from subprocess import call
 from time import gmtime, strftime
 from sdat2img import d2i
+import sys
 
-def sin(rom):
+def sinlinux(rom):
 	print 'Please wait...\nGetting system.sin from ROM...'
 	foldersin = 'system.sin' + rom.replace('/','.')
 	if os.path.exists(foldersin):
@@ -33,9 +34,40 @@ def sin(rom):
 	os.system('rm -rf ' + foldersin)
 	return output
 
+def sinwindows(rom):
+	print 'Please wait...\nGetting system.sin from ROM...'
+	foldersin = 'system.sin' + rom.replace('/','.')
+	if os.path.exists(foldersin):
+		shutil.rmtree(foldersin)
+	with zipfile.ZipFile(rom,"r") as zip_ref:
+		zip_ref.extract('system.sin', foldersin)
+	print 'GET system.sin SUCCESSFULLY.\nGetting system.ext4 from system.sin...'
+	os.system('java -jar "sin2ext4.jar" ' + foldersin + '/system.sin')
+
+	print 'GET system.ext4 SUCCESSFULLY.'
+	print 'Extracting system.ext4...'
+	tmp = 'system' + rom.replace('/','.')
+	if os.path.exists(tmp):
+		shutil.rmtree(tmp)
+	os.makedirs(tmp)
+	os.system('ImgExtractor.exe ' + foldersin + '/system.ext4 ' + tmp)
+	print 'EXTRACT system.ext4 SUCCESSFULLY.\nGetting /system/framework...'
+	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	os.makedirs(output)
+	os.system('copy "' + tmp + '/framework" ' + output)
+	print 'GET /system/framework SUCCESSFULLY.'
+	shutil.rmtree(tmp)
+	shutil.rmtree(foldersin)
+	return output
+
+def sin(rom):
+	if sys.platform == "linux" or sys.platform == "linux2":
+		sinlinux(rom)
+	elif sys.platform == "win32":
+		sinwindows(rom)
 
 
-def dat(rom):
+def datlinux(rom):
 	print 'Please wait...\nGetting system.transfer.list and system.new.dat from ROM...'
 	folderdat = 'system.dat' + rom.replace('/','.')
 	if os.path.exists(folderdat):
@@ -64,7 +96,42 @@ def dat(rom):
 	os.system('rm -rf ' + tmp)
 	return output
 
-def raw(rom):
+
+def datwindows(rom):
+	print 'Please wait...\nGetting system.transfer.list and system.new.dat from ROM...'
+	folderdat = 'system.dat' + rom.replace('/','.')
+	if os.path.exists(folderdat):
+		shutil.rmtree(folderdat)
+	with zipfile.ZipFile(rom,"r") as zip_ref:
+		zip_ref.extract('system.new.dat', folderdat)
+		zip_ref.extract('system.transfer.list', folderdat)
+	print 'GET system.transfer.list AND system.new.dat SUCCESSFULLY.\nGetting system.img...'
+	#call(["python", "./sdat2img.py", folderdat + "/system.transfer.list", folderdat + "/system.new.dat", folderdat + "/system.img"])
+	d2i(['',folderdat + "/system.transfer.list",folderdat + "/system.new.dat",folderdat + "/system.img"])
+	print 'GET system.img SUCCESSFULLY.'
+	print 'Extracting system.img...'
+	tmp = 'system' + rom.replace('/','.')
+	if os.path.exists(tmp):
+		shutil.rmtree(tmp)
+	os.makedirs(tmp)
+	os.system('ImgExtractor.exe ' + folderdat + '/system.img ' + tmp)
+	print 'EXTRACT system.img SUCCESSFULLY.\nGetting /system/framework...'
+	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	os.makedirs(output)
+	os.system('copy "' + tmp + '/framework" ' + output)
+	print 'GET /system/framework SUCCESSFULLY.'
+	shutil.rmtree(folderdat)
+	shutil.rmtree(tmp)
+	return output
+
+def dat(rom):
+	if sys.platform == "linux" or sys.platform == "linux2":
+		datlinux(rom)
+	elif sys.platform == "win32":
+		datwindows(rom)
+
+
+def rawlinux(rom):
 	print 'Please wait...\nExtracting ROM...'
 	folderraw = 'system.raw' + rom.replace('/','.')
 	if os.path.exists(folderraw):
@@ -80,3 +147,25 @@ def raw(rom):
 	print 'GET /system/framework SUCCESSFULLY.'
 	os.system('rm -rf ' + tmp)
 	return output
+
+def rawwindows(rom):
+	print 'Please wait...\nExtracting ROM...'
+	folderraw = 'system.raw' + rom.replace('/','.')
+	if os.path.exists(folderraw):
+		shutil.rmtree(folderraw)
+	tmp = 'ROM' + rom.replace('/','.')
+	with zipfile.ZipFile(rom,"r") as zip_ref:
+		zip_ref.extractall("./" + tmp)
+	print 'EXTRACT ROM SUCCESSFULLY.\nGetting /system/framework...'
+	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	os.makedirs(output)
+	os.system('copy "' + tmp + '/system/framework" ' + output)
+	print 'GET /system/framework SUCCESSFULLY.'
+	shutil.rmtree(tmp)
+	return output
+
+def raw(rom):
+	if sys.platform == "linux" or sys.platform == "linux2":
+		rawlinux(rom)
+	elif sys.platform == "win32":
+		rawwindows(rom)
