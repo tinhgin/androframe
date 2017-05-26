@@ -76,7 +76,6 @@ def datlinux(rom):
 		zip_ref.extract('system.new.dat', folderdat)
 		zip_ref.extract('system.transfer.list', folderdat)
 	print 'GET system.transfer.list AND system.new.dat SUCCESSFULLY.\nGetting system.img...'
-	#call(["python", "./sdat2img.py", folderdat + "/system.transfer.list", folderdat + "/system.new.dat", folderdat + "/system.img"])
 	d2i(['',folderdat + "/system.transfer.list",folderdat + "/system.new.dat",folderdat + "/system.img"])
 	print 'GET system.img SUCCESSFULLY.'
 	print 'Mounting system.img...'
