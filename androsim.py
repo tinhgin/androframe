@@ -57,8 +57,6 @@ def androsimplus(jar_o, b1, file_to_compare,report):
         print elshow
 
 
-        print "\t--> methods: %f%% of similarities" % el.get_similarity_value(new)
-
         if options['dump']:
             print '\nDumping smali code...'
             tmp1 = options['input'][1].split('/')
@@ -66,7 +64,11 @@ def androsimplus(jar_o, b1, file_to_compare,report):
             if not os.path.exists('smali'):
                 os.makedirs('smali')
             os.system('java -jar baksmali-2.2.1.jar d --pr false ' + options['input'][1])
-            os.system('mv -f out smali/' + jarname)
+            if sys.platform == "linux" or sys.platform == "linux2":
+                os.system('mv -f out smali/' + jarname)
+            elif sys.platform == "win32":
+                os.system('move out smali/' + jarname)
+
 
             classes = Set([])
             diff_methods = el.get_similar_elements()
@@ -85,7 +87,10 @@ def androsimplus(jar_o, b1, file_to_compare,report):
             os.chdir('codedump')
 
             if os.path.exists(jarname):
-                os.system('rm -rf ' + jarname)
+                if sys.platform == "linux" or sys.platform == "linux2":
+                    os.system('rm -rf ' + jarname)
+                elif sys.platform == "win32":
+                    shutil.rmtree(jarname)
             os.makedirs(jarname)
             os.chdir('..')
             for i in range(0, len(classes)):
@@ -118,7 +123,7 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                         if (xx[1].split('(')[0] in line) and ('.method' in line):
                             start = line.replace('\n', '')
                             break
-                #med = xx[1].split('(', 1)[0]
+                med = xx[1].split('(', 1)[0]
                 with open('codedump/' + jarname + '/' + xx[0]) as infile, open('methoddump/' + jarname + '/' + xx[0] + '.' + med + '.method', 'w+') as outfile:
                     copy = False
                     outfile.write(start + '\n')
@@ -251,3 +256,5 @@ def androsimplus(jar_o, b1, file_to_compare,report):
     print 'Please wait...\nComparing smali code...'
     options = {'dump': 1, 'xstrings': None, 'library': None, 'compressor': 'ZLIB', 'version': None, 'exclude': None, 'threshold': None, 'input': (jar_o, jar_e), 'new': None, 'display': None, 'size': None}
     mainn(options)
+
+#androsimplus('a.jar', '', 'b.jar', [])
