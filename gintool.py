@@ -43,20 +43,24 @@ def dump2(b1, file_to_check, report):
 report = []
 
 def main(argv):
-    #a = extractor(argv[1])
-    #b = extractor(argv[2])
-
-    a='framework_2017-05-24_07-12-19'
-    b='framework_2017-05-24_07-12-49'
+    a = extractor(argv[1])
+    b = extractor(argv[2])
+    #a='framework_2017-05-24_07-12-19'
+    #b='framework_2017-05-24_07-12-49'
     aa = getfilename(a)
     bb = getfilename(b)
+    for i in range(0,len(aa)):
+        aa[i] = aa[i].replace('\\', '/')
+    for i in range(0,len(bb)):
+        bb[i] = bb[i].replace('\\', '/')
     aaa = []
     bbb = []
     #print aa,'\n\n',bb############
     a1 = a + '/'
     #print a1#################
     for i in range(len(aa)):
-        tmp = aa[i].split('/',1)[1]
+        tmp = aa[i].split('/', 1)[1]
+
         aaa.append(tmp)
 
     report.append(aaa)
@@ -64,7 +68,8 @@ def main(argv):
     b1 = b + '/'
     #print b1################
     for i in range(len(bb)):
-        tmp = bb[i].split('/',1)[1]
+        tmp = bb[i].split('/', 1)[1]
+
         bbb.append(tmp)
     #print aaa,'\n\n',bbb###############
 

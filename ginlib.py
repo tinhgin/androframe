@@ -62,9 +62,9 @@ def sinwindows(rom):
 
 def sin(rom):
 	if sys.platform == "linux" or sys.platform == "linux2":
-		sinlinux(rom)
+		return sinlinux(rom)
 	elif sys.platform == "win32":
-		sinwindows(rom)
+		return sinwindows(rom)
 
 
 def datlinux(rom):
@@ -125,9 +125,9 @@ def datwindows(rom):
 
 def dat(rom):
 	if sys.platform == "linux" or sys.platform == "linux2":
-		datlinux(rom)
+		return datlinux(rom)
 	elif sys.platform == "win32":
-		datwindows(rom)
+		return datwindows(rom)
 
 
 def rawlinux(rom):
@@ -165,6 +165,6 @@ def rawwindows(rom):
 
 def raw(rom):
 	if sys.platform == "linux" or sys.platform == "linux2":
-		rawlinux(rom)
+		return rawlinux(rom)
 	elif sys.platform == "win32":
-		rawwindows(rom)
+		return rawwindows(rom)

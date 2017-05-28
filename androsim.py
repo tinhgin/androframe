@@ -60,6 +60,7 @@ def androsimplus(jar_o, b1, file_to_compare,report):
         if options['dump']:
             print '\nDumping smali code...'
             tmp1 = options['input'][1].split('/')
+            
             jarname = tmp1[len(tmp1) - 1]
             if not os.path.exists('smali'):
                 os.makedirs('smali')
@@ -98,7 +99,17 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                 filepath = classes.pop()
                 filename = filepath.replace('/', '.')
                 shutil.copy2('smali/' + jarname + '/' + filepath, 'codedump/' + jarname + '/' + filename)
-            os.system('rmdir codedump/' + jarname)
+
+            if sys.platform == "linux" or sys.platform == "linux2":
+                try:
+                    os.system('rmdir codedump/' + jarname)
+                except:
+                    print ""
+            elif sys.platform == "win32":
+                try:
+                    os.system('rmdir codedump\\' + jarname)
+                except:
+                    print ""
 
             classes1 = Set([])
             for i in diff_methods:
@@ -124,7 +135,8 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                             start = line.replace('\n', '')
                             break
                 med = xx[1].split('(', 1)[0]
-                with open('codedump/' + jarname + '/' + xx[0]) as infile, open('methoddump/' + jarname + '/' + xx[0] + '.' + med + '.method', 'w+') as outfile:
+                med = med.replace('<','@').replace('>','@')
+                with open('codedump\\' + jarname + '\\' + xx[0]) as infile, open('methoddump\\' + jarname + '\\' + xx[0] + '.' + med + '.method', 'w+') as outfile:
                     copy = False
                     outfile.write(start + '\n')
                     for line1 in infile:
@@ -257,4 +269,4 @@ def androsimplus(jar_o, b1, file_to_compare,report):
     options = {'dump': 1, 'xstrings': None, 'library': None, 'compressor': 'ZLIB', 'version': None, 'exclude': None, 'threshold': None, 'input': (jar_o, jar_e), 'new': None, 'display': None, 'size': None}
     mainn(options)
 
-#androsimplus('a.jar', '', 'b.jar', [])
+#androsimplus('framework_2017-05-24_07-12-19/android.test.runner.jar', 'framework_2017-05-24_07-12-49/', 'android.test.runner.jar', [])
