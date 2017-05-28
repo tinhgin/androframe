@@ -1,4 +1,4 @@
-def androsimplus(jar_o, b1, file_to_compare,report):
+def androsimplus(jar_o, b1, file_to_compare, data):
     jar_e = b1 + file_to_compare
     # !/usr/bin/env python
 
@@ -36,7 +36,7 @@ def androsimplus(jar_o, b1, file_to_compare,report):
     from elsim.elsim_dalvik import ProxyDalvik, FILTERS_DALVIK_SIM
     from elsim.elsim_dalvik import ProxyDalvikStringMultiple, ProxyDalvikStringOne, FILTERS_DALVIK_SIM_STRING
 
-    def check_one_file(report,file_to_compare,a, d1, dx1, FS, threshold, file_input, view_strings=False, new=True, library=True):
+    def check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, file_input, view_strings=False, new=True, library=True):
         d2 = None
         ret_type = androconf.is_android(file_input)
         if ret_type == "APK":
@@ -50,10 +50,11 @@ def androsimplus(jar_o, b1, file_to_compare,report):
         dx2 = analysis.VMAnalysis(d2)
 
         el = elsim.Elsim(ProxyDalvik(d1, dx1), ProxyDalvik(d2, dx2), FS, threshold, options['compressor'], libnative=library)
-        #el.show()
 
-        elshow = file_to_compare + el.show1() + "\n\t--> methods: " + str(el.get_similarity_value(new)) + "% of similarities"
-        report.append(elshow)
+        elshow = file_to_compare + el.show1() + "\n--> methods: " + str(el.get_similarity_value(new)) + "% of similarities"
+        elshow1 = elshow.replace('\n\t','<br>')
+        elshow1 = elshow1.replace('#Elements:','\n')
+        data.write('^^\n' + elshow1)
         print elshow
 
 
@@ -214,7 +215,7 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                 for i in skipped_strings:
                     els.show_element(i)
 
-    def check_one_directory(report,file_to_compare,a, d1, dx1, FS, threshold, directory, view_strings=False, new=True, library=True):
+    def check_one_directory(data, file_to_compare,a, d1, dx1, FS, threshold, directory, view_strings=False, new=True, library=True):
         for root, dirs, files in os.walk(directory, followlinks=True):
             if files != []:
                 for f in files:
@@ -224,7 +225,7 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                     real_filename += f
 
                     print "filename: %s ..." % real_filename
-                    check_one_file(report,file_to_compare,a, d1, dx1, FS, threshold, real_filename, view_strings, new, library)
+                    check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, real_filename, view_strings, new, library)
 
     ############################################################
     def mainn(options):
@@ -258,9 +259,9 @@ def androsimplus(jar_o, b1, file_to_compare,report):
                     library = False
 
             if os.path.isdir(options['input'][1]) == False:
-                check_one_file(report,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
+                check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
             else:
-                check_one_directory(report,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
+                check_one_directory(data,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
 
         elif options['version'] != None:
             print "Androsim version %s" % androconf.ANDROGUARD_VERSION
