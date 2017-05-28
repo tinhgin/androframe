@@ -51,10 +51,10 @@ def androsimplus(jar_o, b1, file_to_compare, data):
 
         el = elsim.Elsim(ProxyDalvik(d1, dx1), ProxyDalvik(d2, dx2), FS, threshold, options['compressor'], libnative=library)
 
-        elshow = file_to_compare + el.show1() + "\n--> methods: " + str(el.get_similarity_value(new)) + "% of similarities"
+        elshow = file_to_compare + el.show1() + "\n--> methods: " + str(el.get_similarity_value(new)) + "% of similarities\n"
         elshow1 = elshow.replace('\n\t','<br>')
-        elshow1 = elshow1.replace('#Elements:','\n')
-        data.write('^^\n' + elshow1)
+        elshow1 = elshow1.replace('#Elements:','\n').replace('\n-->','<br>-->')
+        data.write(elshow1)
         print elshow
 
 

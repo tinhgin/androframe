@@ -68,7 +68,7 @@ def main(argv):
 
         aaa.append(tmp)
 
-    write_data_report(data, aaa, 'filesinframework1')
+    write_data_report(data, aaa, 'framework_folder1')
     b1 = b + '/'
     #print b1################
     for i in range(len(bb)):
@@ -76,7 +76,7 @@ def main(argv):
 
         bbb.append(tmp)
 
-    write_data_report(data, bbb, 'filesinframework2')
+    write_data_report(data, bbb, 'framework_folder2')
 
     file_to_compare = []
     file_to_check = []
@@ -100,7 +100,7 @@ def main(argv):
             #os.system(tmp2)
         except:
             show = file_to_compare[i] + '#Error'
-            data.write('^^\n' + show.replace('#Error', '\n<br>ERROR\n'))
+            data.write(show.replace('#Error', '\n<br>ERROR\n'))
             print show
 
     for i in range(len(file_to_check)):
@@ -108,7 +108,7 @@ def main(argv):
             dump2(b1, file_to_check[i],data)
         except:
             show = file_to_check[i] + '#Error'
-            data.write('^^\n' + show.replace('#Error', '\n<br>ERROR\n'))
+            data.write(show.replace('#Error', '\n<br>ERROR\n'))
             print show
     data.close()
 
