@@ -12,6 +12,12 @@ def getfilename(dir):
             k.append(os.path.join(root,filename))
     return k
 
+def write_data_report(data, list, name):
+    data.write('^^\n' + name + '\n')
+    data.write(str(len(list)) + '\n')
+    for x in list:
+        data.write(x + '\n')
+
 def splitfilename(files):
     files1 = []
     for i in range(len(files)):
@@ -20,7 +26,7 @@ def splitfilename(files):
 
 
 
-def dump2(b1, file_to_check, report):
+def dump2(b1, file_to_check, data):
     jarfile = b1 + file_to_check
     tmp = 'apktool d ' + jarfile
     os.system(tmp)
@@ -37,16 +43,15 @@ def dump2(b1, file_to_check, report):
         k = files1[i].replace('/','.')
         shutil.copy2(files[i], 'codedump/' + directory + '/' + k)
     os.system('mv -f ' + out + ' smali')
-    report.append(file_to_check + "#Dumped")
+    #report.append(file_to_check + "#Dumped")
 
-
-report = []
 
 def main(argv):
-    a = extractor(argv[1])
-    b = extractor(argv[2])
-    #a='framework_2017-05-24_07-12-19'
-    #b='framework_2017-05-24_07-12-49'
+    data = open('data.txt', 'w+')
+    #a = extractor(argv[1])
+    #b = extractor(argv[2])
+    a='framework_2017-05-28_04-01-07'
+    b='framework_2017-05-28_04-01-44'
     aa = getfilename(a)
     bb = getfilename(b)
     for i in range(0,len(aa)):
@@ -63,17 +68,15 @@ def main(argv):
 
         aaa.append(tmp)
 
-    report.append(aaa)
-
+    write_data_report(data, aaa, 'filesinframework1')
     b1 = b + '/'
     #print b1################
     for i in range(len(bb)):
         tmp = bb[i].split('/', 1)[1]
 
         bbb.append(tmp)
-    #print aaa,'\n\n',bbb###############
 
-    report.append(bbb)
+    write_data_report(data, bbb, 'filesinframework2')
 
     file_to_compare = []
     file_to_check = []
@@ -87,33 +90,27 @@ def main(argv):
     #print len(file_to_check), len(file_to_compare)
     #return 0
 
-    report.append(file_to_check)
-    report.append(file_to_compare)
-    report.append(len(file_to_compare))
+    write_data_report(data, file_to_check, 'listfile2check')
+    write_data_report(data, file_to_compare, 'listfile2compare')
 
     for i in range(len(file_to_compare)):
         try:
             #tmp2 = 'python androsim.py -i ' + a1 + file_to_compare[i] + ' ' + b1 + file_to_compare[i] + ' -c ZLIB -p'
-            androsimplus(a1 + file_to_compare[i],b1, file_to_compare[i],report)
+            androsimplus(a1 + file_to_compare[i],b1, file_to_compare[i], data)
             #os.system(tmp2)
         except:
             show = file_to_compare[i] + '#Error'
-            report.append(show)
+            data.write('^^\n' + show.replace('#Error', '\n<br>ERROR\n'))
             print show
 
-    report.append(len(file_to_check))
     for i in range(len(file_to_check)):
         try:
-            dump2(b1, file_to_check[i],report)
+            dump2(b1, file_to_check[i],data)
         except:
             show = file_to_check[i] + '#Error'
-            report.append(show)
+            data.write('^^\n' + show.replace('#Error', '\n<br>ERROR\n'))
             print show
-
-    print report
-
-
-
+    data.close()
 
 
 if __name__ == '__main__':
