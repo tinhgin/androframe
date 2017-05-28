@@ -409,7 +409,7 @@ class Elsim(object):
         #self.sim.show()
 
     def show1(self):
-        return "#Elements:\n" + "\t IDENTICAL:\t" + str(len(self.get_identical_elements())) + "\n\t SIMILAR: \t" + str(len(self.get_similar_elements())) + "\n\t NEW:\t\t" + str(len(self.get_new_elements())) + "\n\t DELETED:\t" + str(len(self.get_deleted_elements())) + "\n\t SKIPPED:\t" + str(len(self.get_skipped_elements()))
+        return "#Elements:\n" + "\t    IDENTICAL:\t" + str(len(self.get_identical_elements())) + "\n\t    SIMILAR: \t" + str(len(self.get_similar_elements())) + "\n\t    NEW:\t\t" + str(len(self.get_new_elements())) + "\n\t    DELETED:\t" + str(len(self.get_deleted_elements())) + "\n\t    SKIPPED:\t" + str(len(self.get_skipped_elements()))
 
 
 ADDED_ELEMENTS = "added elements"
