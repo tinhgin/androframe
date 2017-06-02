@@ -48,10 +48,12 @@ def dump2(b1, file_to_check, data):
 
 def main(argv):
     data = open('data.txt', 'w+')
-    #a = extractor(argv[1])
-    #b = extractor(argv[2])
-    a='framework_2017-05-28_04-01-07'
-    b='framework_2017-05-28_04-01-44'
+    a = extractor(argv[1], data)
+    b = extractor(argv[2], data)
+    data.write(argv[1] + '\n')
+    data.write(argv[2] + '\n')
+    #a='framework_2017-05-28_04-01-07'
+    #b='framework_2017-05-28_04-01-44'
     aa = getfilename(a)
     bb = getfilename(b)
     for i in range(0,len(aa)):
