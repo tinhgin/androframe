@@ -40,8 +40,8 @@ def androsimplus(jar_o, b1, file_to_compare, data):
         d2 = None
         ret_type = androconf.is_android(file_input)
         if ret_type == "APK":
-            a = apk.APK(file_input)
-            d2 = dvm.DalvikVMFormat(a.get_dex())
+            b = apk.APK(file_input)
+            d2 = dvm.DalvikVMFormat(b.get_dex())
         elif ret_type == "DEX":
             d2 = dvm.DalvikVMFormat(read(file_input))
 
