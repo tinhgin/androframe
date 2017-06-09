@@ -28,22 +28,48 @@ def splitfilename(files):
 
 def dump2(b1, file_to_check, data):
     jarfile = b1 + file_to_check
-    tmp = 'apktool d ' + jarfile
-    os.system(tmp)
-    directory = jarfile.split('/')[len(jarfile.split('/'))-1]
-    if os.path.exists('codedump/' + directory):
-        os.system('rm -rf ' + 'codedump/' + directory)
-    os.makedirs('codedump/' + directory)
-    out = directory + '.out'
-    if directory[len(directory)-4:len(directory)] == '.apk':
-        out = directory[0:len(directory)-4]    
-    files = getfilename(out + '/smali')
-    files1 = splitfilename(splitfilename(files))
+    os.system('java -jar baksmali-2.2.1.jar d --pr false ' + jarfile)
+    directory = jarfile.split('/')[len(jarfile.split('/')) - 1]
+    if sys.platform == "linux" or sys.platform == "linux2":
+        os.system('mv -f out smali/' + directory)
+    elif sys.platform == "win32":
+        os.system('move out smali/' + directory)
+
+    os.makedirs('codedump_check/' + directory)
+    out = 'smali/' + directory
+    files = getfilename(out)
+    files1 = splitfilename(files)
     for i in range(len(files1)):
-        k = files1[i].replace('/','.')
-        shutil.copy2(files[i], 'codedump/' + directory + '/' + k)
-    os.system('mv -f ' + out + ' smali')
-    #report.append(file_to_check + "#Dumped")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            k = files1[i].replace('/', '.')
+        elif sys.platform == "win32":
+            k = files1[i].replace('\\', '.')
+        shutil.copy2(files[i], 'codedump_check/' + directory + '/' + k)
+        if not os.path.exists('methoddump_check'):
+            os.makedirs('methoddump_check')
+        if not os.path.exists('methoddump_check/' + directory):
+            os.makedirs('methoddump_check/' + directory)
+        with open('codedump_check/' + directory + '/' + k) as infile:
+            copy = False
+            for line in infile:
+                if ".method" in line:
+                    copy = True
+                    name_method = line.split(' ')[-1].replace('<','@').replace('>','@').split('(')[0]
+                    outfile = open('methoddump_check/' + directory + '/' + k + name_method + '.method', 'w+')
+                    outfile.write(line)
+                    continue
+                if copy == False:
+                    continue
+                else:
+                    if '.end method' not in line:
+                        outfile.write(line)
+                    else:
+                        copy = False
+                        outfile.write('.end method')
+                        outfile.close()
+
+
+
 
 
 def main(argv):
