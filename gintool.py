@@ -7,11 +7,11 @@ from androsim import androsimplus
 def make_clean(rom1, rom2):
     if sys.platform == "linux" or sys.platform == "linux2":
         try:
-            os.system('rm -rf framework_* smali codedump methoddump codedump_check methoddump_check data.txt')
+            os.system('rm -rf framework_* smali codedump methoddump codedump_check methoddump_check')
         except:
             return
     elif sys.platform == "win32":
-        bin = ['framework_' + rom1, 'framework_' + rom2, 'smali', 'codedump', 'codedump_check', 'methoddump', 'methoddump_check', 'data.txt']
+        bin = ['framework_' + rom1, 'framework_' + rom2, 'smali', 'codedump', 'codedump_check', 'methoddump', 'methoddump_check']
         for i in bin:
             try:
                 shutil.rmtree(i)
