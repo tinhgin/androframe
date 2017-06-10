@@ -60,7 +60,7 @@ def androsimplus(jar_o, b1, file_to_compare, data):
         data.write(elshow1)
         print elshow
 
-        if options['dump']:
+        if options['dump'] and el.get_similarity_value(new) < 100.0:
             print '\nDumping smali code...'
             tmp1 = options['input'][1].split('/')
 
