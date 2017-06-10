@@ -24,7 +24,7 @@ def androsimplus(jar_o, b1, file_to_compare, data):
     from sets import Set
     import shutil
 
-    #from optparse import OptionParser
+    # from optparse import OptionParser
 
     from androguard.core import androconf
     from androguard.core.bytecodes import apk, dvm
@@ -36,7 +36,8 @@ def androsimplus(jar_o, b1, file_to_compare, data):
     from elsim.elsim_dalvik import ProxyDalvik, FILTERS_DALVIK_SIM
     from elsim.elsim_dalvik import ProxyDalvikStringMultiple, ProxyDalvikStringOne, FILTERS_DALVIK_SIM_STRING
 
-    def check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, file_input, view_strings=False, new=True, library=True):
+    def check_one_file(data, file_to_compare, a, d1, dx1, FS, threshold, file_input, view_strings=False, new=True,
+                       library=True):
         d2 = None
         ret_type = androconf.is_android(file_input)
         if ret_type == "APK":
@@ -49,40 +50,42 @@ def androsimplus(jar_o, b1, file_to_compare, data):
             return
         dx2 = analysis.VMAnalysis(d2)
 
-        el = elsim.Elsim(ProxyDalvik(d1, dx1), ProxyDalvik(d2, dx2), FS, threshold, options['compressor'], libnative=library)
+        el = elsim.Elsim(ProxyDalvik(d1, dx1), ProxyDalvik(d2, dx2), FS, threshold, options['compressor'],
+                         libnative=library)
 
-        elshow = file_to_compare + el.show1() + "\n--> methods: " + str(el.get_similarity_value(new)) + "% of similarities\n"
-        elshow1 = elshow.replace('\n\t','<br>')
-        elshow1 = elshow1.replace('#Elements:','\n').replace('\n-->','<br>-->')
+        elshow = file_to_compare + el.show1() + "\n--> methods: " + str(
+            el.get_similarity_value(new)) + "% of similarities\n"
+        elshow1 = elshow.replace('\n\t', '<br>')
+        elshow1 = elshow1.replace('#Elements:', '\n').replace('\n-->', '<br>-->')
         data.write(elshow1)
         print elshow
-
 
         if options['dump']:
             print '\nDumping smali code...'
             tmp1 = options['input'][1].split('/')
-            
+
             jarname = tmp1[len(tmp1) - 1]
             if not os.path.exists('smali'):
                 os.makedirs('smali')
-            os.system('java -jar baksmali-2.2.1.jar d --pr false ' + options['input'][1])
-            if sys.platform == "linux" or sys.platform == "linux2":
-                os.system('mv -f out smali/' + jarname)
-            elif sys.platform == "win32":
-                os.system('move out smali/' + jarname)
-
+            os.system('java -jar baksmali-2.2.1.jar d --pr false -o smali/' + jarname + ' ' + options['input'][1])
 
             classes = Set([])
+            classes1 = Set([])
             diff_methods = el.get_similar_elements()
             for i in diff_methods:
                 x = el.show_similar_class_name(i)
+                y = el.show_similar_method_name(i)
                 for j in range(0, len(x)):
                     classes.add(x.pop())
+                for j in range(0, len(y)):
+                    classes1.add(y.pop())
 
             new_methods = el.get_new_elements()
             for i in new_methods:
-                y = el.show_new_class_name(i)
-                classes.add(y)
+                x = el.show_new_class_name(i)
+                classes.add(x)
+                y = el.show_new_method_name(i)
+                classes1.add(y)
 
             if not os.path.exists('codedump'):
                 os.makedirs('codedump')
@@ -112,14 +115,6 @@ def androsimplus(jar_o, b1, file_to_compare, data):
                 except:
                     print ""
 
-            classes1 = Set([])
-            for i in diff_methods:
-                x = el.show_similar_method_name(i)
-                for j in range(0, len(x)):
-                    classes1.add(x.pop())
-            for i in new_methods:
-                y = el.show_new_method_name(i)
-                classes1.add(y)
             start = ''
             end = '.end method'
             if not os.path.exists('methoddump'):
@@ -136,8 +131,9 @@ def androsimplus(jar_o, b1, file_to_compare, data):
                             start = line.replace('\n', '')
                             break
                 med = xx[1].split('(', 1)[0]
-                med = med.replace('<','@').replace('>','@')
-                with open('codedump\\' + jarname + '\\' + xx[0]) as infile, open('methoddump\\' + jarname + '\\' + xx[0] + '.' + med + '.method', 'w+') as outfile:
+                med = med.replace('<', '@').replace('>', '@')
+                with open('codedump\\' + jarname + '\\' + xx[0]) as infile, open('methoddump\\' + jarname + '\\' + xx[
+                    0] + '.' + med + '.method', 'w+') as outfile:
                     copy = False
                     outfile.write(start + '\n')
                     for line1 in infile:
@@ -215,7 +211,8 @@ def androsimplus(jar_o, b1, file_to_compare, data):
                 for i in skipped_strings:
                     els.show_element(i)
 
-    def check_one_directory(data, file_to_compare,a, d1, dx1, FS, threshold, directory, view_strings=False, new=True, library=True):
+    def check_one_directory(data, file_to_compare, a, d1, dx1, FS, threshold, directory, view_strings=False, new=True,
+                            library=True):
         for root, dirs, files in os.walk(directory, followlinks=True):
             if files != []:
                 for f in files:
@@ -225,7 +222,8 @@ def androsimplus(jar_o, b1, file_to_compare, data):
                     real_filename += f
 
                     print "filename: %s ..." % real_filename
-                    check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, real_filename, view_strings, new, library)
+                    check_one_file(data, file_to_compare, a, d1, dx1, FS, threshold, real_filename, view_strings, new,
+                                   library)
 
     ############################################################
     def mainn(options):
@@ -259,15 +257,18 @@ def androsimplus(jar_o, b1, file_to_compare, data):
                     library = False
 
             if os.path.isdir(options['input'][1]) == False:
-                check_one_file(data,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
+                check_one_file(data, file_to_compare, a, d1, dx1, FS, threshold, options['input'][1],
+                               options['xstrings'], new, library)
             else:
-                check_one_directory(data,file_to_compare,a, d1, dx1, FS, threshold, options['input'][1], options['xstrings'], new, library)
+                check_one_directory(data, file_to_compare, a, d1, dx1, FS, threshold, options['input'][1],
+                                    options['xstrings'], new, library)
 
         elif options['version'] != None:
             print "Androsim version %s" % androconf.ANDROGUARD_VERSION
 
     print 'Please wait...\nComparing smali code...'
-    options = {'dump': 1, 'xstrings': None, 'library': None, 'compressor': 'ZLIB', 'version': None, 'exclude': None, 'threshold': None, 'input': (jar_o, jar_e), 'new': None, 'display': None, 'size': None}
+    options = {'dump': 1, 'xstrings': None, 'library': None, 'compressor': 'ZLIB', 'version': None, 'exclude': None,
+               'threshold': None, 'input': (jar_o, jar_e), 'new': None, 'display': None, 'size': None}
     mainn(options)
 
-#androsimplus('framework_2017-05-24_07-12-19/android.test.runner.jar', 'framework_2017-05-24_07-12-49/', 'android.test.runner.jar', [])
+    # androsimplus('framework_2017-05-24_07-12-19/android.test.runner.jar', 'framework_2017-05-24_07-12-49/', 'android.test.runner.jar', [])
