@@ -99,7 +99,6 @@ def androsimplus(jar_o, b1, file_to_compare, data):
             os.makedirs(jarname)
             os.chdir('..')
             for i in range(0, len(classes)):
-                # os.makedirs('codedump/' + jarname)
                 filepath = classes.pop()
                 filename = filepath.replace('/', '.')
                 shutil.copy2('smali/' + jarname + '/' + filepath, 'codedump/' + jarname + '/' + filename)

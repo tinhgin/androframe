@@ -24,7 +24,8 @@ def sinlinux(rom):
 	os.makedirs(tmp)
 	os.system('sudo mount -t ext4 -o loop ' + foldersin + '/system.ext4 ./' + tmp)
 	print 'MOUNT system.ext4 SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	tmp1 = 'cp -r ' + tmp + '/framework/* ' + output
 	os.system(tmp1)
@@ -52,7 +53,8 @@ def sinwindows(rom):
 	os.makedirs(tmp)
 	os.system('ImgExtractor.exe ' + foldersin + '/system.ext4 ' + tmp)
 	print 'EXTRACT system.ext4 SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	os.system('copy "' + tmp + '/framework" ' + output)
 	print 'GET /system/framework SUCCESSFULLY.'
@@ -85,7 +87,8 @@ def datlinux(rom):
 	os.makedirs(tmp)
 	os.system('sudo mount -o loop ' + folderdat + '/system.img ' + tmp)
 	print 'MOUNT system.img SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	tmp1 = 'cp -r ' + tmp + '/framework/* ' + output
 	os.system(tmp1)
@@ -105,7 +108,6 @@ def datwindows(rom):
 		zip_ref.extract('system.new.dat', folderdat)
 		zip_ref.extract('system.transfer.list', folderdat)
 	print 'GET system.transfer.list AND system.new.dat SUCCESSFULLY.\nGetting system.img...'
-	#call(["python", "./sdat2img.py", folderdat + "/system.transfer.list", folderdat + "/system.new.dat", folderdat + "/system.img"])
 	d2i(['',folderdat + "/system.transfer.list",folderdat + "/system.new.dat",folderdat + "/system.img"])
 	print 'GET system.img SUCCESSFULLY.'
 	print 'Extracting system.img...'
@@ -115,7 +117,8 @@ def datwindows(rom):
 	os.makedirs(tmp)
 	os.system('ImgExtractor.exe ' + folderdat + '/system.img ' + tmp)
 	print 'EXTRACT system.img SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	os.system('copy "' + tmp + '/framework" ' + output)
 	print 'GET /system/framework SUCCESSFULLY.'
@@ -139,7 +142,8 @@ def rawlinux(rom):
 	with zipfile.ZipFile(rom,"r") as zip_ref:
 		zip_ref.extractall("./" + tmp)
 	print 'EXTRACT ROM SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	tmp1 = 'cp -r ' + tmp + '/system/framework/* ' + output
 	os.system(tmp1)
@@ -156,7 +160,8 @@ def rawwindows(rom):
 	with zipfile.ZipFile(rom,"r") as zip_ref:
 		zip_ref.extractall("./" + tmp)
 	print 'EXTRACT ROM SUCCESSFULLY.\nGetting /system/framework...'
-	output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	#output = 'framework_' + strftime('%Y-%m-%d_%H-%M-%S', gmtime())
+	output = 'framework_' + rom
 	os.makedirs(output)
 	os.system('copy "' + tmp + '/system/framework" ' + output)
 	print 'GET /system/framework SUCCESSFULLY.'

@@ -4,6 +4,19 @@ import os
 import shutil
 from androsim import androsimplus
 
+def make_clean(rom1, rom2):
+    if sys.platform == "linux" or sys.platform == "linux2":
+        try:
+            os.system('rm -rf framework_* smali codedump methoddump codedump_check methoddump_check')
+        except:
+            return
+    elif sys.platform == "win32":
+        bin = ['framework_' + rom1, 'framework_' + rom2, 'smali', 'codedump', 'codedump_check', 'methoddump', 'methoddump_check']
+        for i in bin:
+            try:
+                shutil.rmtree(i)
+            except:
+                continue
 
 def getfilename(dir):
     k=[]
@@ -69,9 +82,6 @@ def dump2(b1, file_to_check, data):
                         outfile.close()
 
 
-
-
-
 def main(argv):
     data = open('data.txt', 'w+')
     a = extractor(argv[1], data)
@@ -88,20 +98,15 @@ def main(argv):
         bb[i] = bb[i].replace('\\', '/')
     aaa = []
     bbb = []
-    #print aa,'\n\n',bb############
     a1 = a + '/'
-    #print a1#################
     for i in range(len(aa)):
         tmp = aa[i].split('/', 1)[1]
-
         aaa.append(tmp)
 
     write_data_report(data, aaa, 'framework_folder1')
     b1 = b + '/'
-    #print b1################
     for i in range(len(bb)):
         tmp = bb[i].split('/', 1)[1]
-
         bbb.append(tmp)
 
     write_data_report(data, bbb, 'framework_folder2')
@@ -114,16 +119,12 @@ def main(argv):
             file_to_compare.append(bbb[i])
         except:
             file_to_check.append(bbb[i])
-    #print file_to_compare,'\n\n',file_to_check##############
-    #print len(file_to_check), len(file_to_compare)
-    #return 0
 
     write_data_report(data, file_to_check, 'listfile2check')
     write_data_report(data, file_to_compare, 'listfile2compare')
 
     for i in range(len(file_to_compare)):
         try:
-            #tmp2 = 'python androsim.py -i ' + a1 + file_to_compare[i] + ' ' + b1 + file_to_compare[i] + ' -c ZLIB -p'
             androsimplus(a1 + file_to_compare[i],b1, file_to_compare[i], data)
             #os.system(tmp2)
         except:
@@ -142,4 +143,5 @@ def main(argv):
 
 
 if __name__ == '__main__':
+    make_clean(sys.argv[1], sys.argv[2])
     main(sys.argv)
