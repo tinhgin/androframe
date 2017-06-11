@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import re, os, sys
+import re, os, sys, string
 
 class MethodItem:
     def __init__(self):
@@ -62,7 +62,7 @@ def relevant_registers_for_the_method(current_instruction):
 
     if p_invoke_range_name.match(current_instruction):
         # We're facing implicit an implicit range declaration, for instance "invoke v19..v20"
-        p_invoke_registers_range = re.compile('^v([0-9]+) ... v([0-9]+), L.*$')
+        p_invoke_registers_range = re.compile('^.*v([0-9]+) .. v([0-9]+), L.*$')
 
         if p_invoke_registers_range.match(current_instruction):
             register_start_number = p_invoke_registers_range.match(current_instruction).groups()[0]
@@ -71,22 +71,20 @@ def relevant_registers_for_the_method(current_instruction):
             if int(register_start_number) > int(register_end_number):
                 xx=1
             else:
-                relevant_registers = [str(i) for i in xrange(int(register_start_number), int(register_end_number))]
+                relevant_registers = [str(i) for i in xrange(int(register_start_number), int(register_end_number)+1)]
                 # +1 because range does not provide the higher boundary value
 
     return relevant_registers
 def find_register_value(method, index, registers_found):
-    p_const = re.compile('^const(?:\/4|\/16|\/high16|-wide(?:\/16|\/32)|-wide\/high16|)? v([0-9]+), \#\+?(-?[0-9]+(?:\.[0-9]+)?)$')
+    p_const = re.compile('^const(?:\/4|\/16|\/high16|-wide(?:\/16|\/32)|-wide\/high16|)? v([0-9]+), (.*)$')
     p_const_string = re.compile('^const-string(?:||\/jumbo) v([0-9]+), (?:\'|\")(.*)(?:\"|\')$')
-    p_move = re.compile('^move(?:|\/from16|-wide(?:\/from16|\/16)|-object(?:|\/from16|\/16))? v([0-9]+), (v[0-9]+)$')
+    p_move = re.compile('^move(?:|\/from16|-wide(?:\/from16|\/16)|-object(?:|\/from16|\/16))? v([0-9]+), v([0-9]+)$')
     p_invoke = re.compile('^invoke-.*$')
     p_invoke_static = re.compile('^invoke-static.*')
     p_move_result = re.compile('^move(?:-result(?:|-wide|-object)|-exception)? v([0-9]+)$')
     p_new_instance = re.compile('^new-instance v([0-9]+), (L(?:.*);)$')
-
+    result=0
     if p_invoke.match(method[index]):
-        instmp=""
-        new = ""
         old = ""
         relevant_registers = relevant_registers_for_the_method(method[index])
         if p_move_result.match(method[index+1]):
@@ -94,16 +92,27 @@ def find_register_value(method, index, registers_found):
         else:
             register_number = relevant_registers[0]
         instmp = method[index]
-        instmp = instmp.replace(instmp[instmp.index("("):instmp.index(")")+1], "()", 1)
+        instmp = instmp.replace(instmp[instmp.index("("):instmp.index(")")+1], "())", 1)
         if p_invoke_static.match(method[index]):
             istart = 0
         else:
             istart = 1
-        for i in range(istart, len(relevant_registers), 1):
+        number = len(relevant_registers)
+        for i in range(istart, number, 1):
             register = relevant_registers[i]
             if registers_found.has_key(register):
-                instmp = instmp.replace(")", registers_found[register]+"; )", 1)
+                if i +1 != number:
+                    instmp = instmp.replace("))", registers_found[register]+", ))", 1)
+                else:
+                    instmp = instmp.replace("))", registers_found[register] + "))", 1)
+            else:
+                if i +1 != number:
+                    instmp = instmp.replace("))", "v" + register+", ))", 1)
+                else:
+                    instmp = instmp.replace("))", "v" + register + "))", 1)
+        instmp = instmp.replace("))", ")", 1)
         new = instmp[instmp.index(">") + 1:]
+        result = new
         if registers_found.has_key(register_number):
             old = registers_found[register_number]
         if "sink" in new:
@@ -126,14 +135,24 @@ def find_register_value(method, index, registers_found):
         registers_found[register_number] = register_value
     if p_move.match(method[index]):
         register_number = p_move.match(method[index]).groups()[0]
-        register_value = p_move.match(method[index]).groups()[1]
-        registers_found[register_number] = register_value
+        register_number1 = p_move.match(method[index]).groups()[1]
+        if registers_found.has_key(register_number1):
+            registers_found[register_number] = registers_found[register_number1]
+        else:
+            registers_found[register_number] = "v"+register_number1
+    return result
 
-def get_method_diff():
+def get_method_diff(dumpfolder):
+    if sys.platform == "linux" or sys.platform == "linux2":
+        end = '\r\n'
+        numend=2
+    elif sys.platform == "win32":
+        end = '\n'
+        numend=1
     MethodDiff=[]
     filesink = open('./Ouput_CatSinks.txt')
     filesource = open('./Ouput_CatSources.txt')
-    for root, dirs, files in os.walk("./methoddump", topdown=False):
+    for root, dirs, files in os.walk("./" + dumpfolder, topdown=False):
         for name in files:
             print(os.path.join(root, name))
             with open(os.path.join(root, name)) as codefile:
@@ -142,11 +161,11 @@ def get_method_diff():
                 check=0
                 for line in codefile:
                     t = ""
-                    if line[:-1]:
+                    if line[:-numend]:
                         if line.split()[0][0].isalpha():
                             for linesink in filesink:
-                                if linesink.endswith(":\n"):
-                                    type = linesink[:-2]
+                                if linesink.endswith(":"+end):
+                                    type = linesink[:-numend-1]
                                 elif linesink[:-1] in line[:-1]:
                                     t = line[4:-1] + "~sink" + ":" + type + "@@"
                                     tmp.listInstruction.append(t)
@@ -155,21 +174,21 @@ def get_method_diff():
                             filesink.seek(0, 0)
                             if t=="":
                                 for linesource in filesource:
-                                    if linesource.endswith(":\n"):
-                                        type = linesource[:-2]
-                                    elif linesource[:-1] in line[:-1]:
-                                        t = line[4:-1] + "~source" + ":" + type + "@"
+                                    if linesource.endswith(":"+end):
+                                        type = linesource[:-numend-1]
+                                    elif linesource[:-numend] in line[:-numend]:
+                                        t = line[4:-numend] + "~source" + ":" + type + "@"
                                         tmp.listInstruction.append(t)
                                         check=1
                                         break
                                 filesource.seek(0, 0)
                             if t == "":
-                                tmp.listInstruction.append(line[4:-1])
+                                tmp.listInstruction.append(line[4:-numend])
             if check:
                 MethodDiff.append(tmp)
     return MethodDiff
-def data_flow():
-    listmethod = get_method_diff()
+def data_flow(dumpfolder):
+    listmethod = get_method_diff(dumpfolder)
     list_result = []
     for file in listmethod:
         method = file.listInstruction
@@ -179,24 +198,15 @@ def data_flow():
             if "{" in method[k]:
                 method[k] = method[k].replace("{","")
                 method[k] = method[k].replace("}","")
-            if "sink" in method[k] and registers_found:
-                relevant_registers = relevant_registers_for_the_method(method[k])
-                instmp = method[k]
-                instmp = instmp.replace(instmp[instmp.index("("):instmp.index(")") + 1], "()", 1)
-                for register in relevant_registers:
-                    if register != relevant_registers[0] and registers_found.has_key(register):
-                        instmp = instmp.replace(")", registers_found[register] + "; )", 1)
+            t = find_register_value(method, k, registers_found)
+            if "sink" in method[k]:
+                instmp = t
                 if "source" in instmp:
-                    tmp = instmp[instmp.index(">")+1:]
                     tmpresult = result()
                     tmpresult.path = file.path
-                    tmpresult.detail = instmp[instmp.index(">")+1:]
-                    tmpresult.sink = tmp[tmp.index("sink:"):tmp.index("@@")]
-                    tmpresult.source = tmp[tmp.index("source:"):tmp.index("@")]
+                    tmpresult.detail = instmp
+                    tmpresult.sink = instmp[instmp.index("sink:"):instmp.index("@@")]
+                    tmpresult.source = instmp[instmp.index("source:"):instmp.index("@")]
                     list_result.append(tmpresult)
-            find_register_value(method, k, registers_found)
             k = k + 1
-
-t=1
-if __name__ =="__main__":
-    data_flow()
+    return list_result
